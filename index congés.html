@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Congés — Appli</title>
+
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0b0f17">
+
+  <style>
+    :root{
+      --bg:#0b0f17; --card:#0f1625; --text:#e8eefc; --muted:#9fb0d0;
+      --border:rgba(255,255,255,.10); --shadow:0 10px 30px rgba(0,0,0,.35);
+      --r:18px;
+      --va:#7aa2ff; --el:#63e6be; --ex:#c084fc;
+      --sick:#ffd43b; --sick2:#ff922b;
+      --danger:#ff6b6b; --ok:#63e6be;
+      --btn:#1b2640;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; padding:16px; min-height:100vh;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:radial-gradient(900px 600px at 20% 10%, rgba(122,162,255,.18), transparent 55%),
+                 radial-gradient(900px 600px at 80% 10%, rgba(192,132,252,.14), transparent 55%),
+                 radial-gradient(900px 600px at 50% 100%, rgba(99,230,190,.12), transparent 60%),
+                 var(--bg);
+      color:var(--text);
+    }
+    .wrap{max-width:980px;margin:0 auto}
+    header{
+      display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+    .title{
+      display:flex; flex-direction:column; gap:2px;
+    }
+    h1{font-size:20px;margin:0}
+    .sub{color:var(--muted);font-size:13px}
+    .grid{
+      display:grid; gap:12px;
+      grid-template-columns: 1.2fr .8fr;
+    }
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+    }
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+      border:1px solid var(--border);
+      border-radius:var(--r);
+      box-shadow:var(--shadow);
+      padding:14px;
+    }
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    label{font-size:13px;color:var(--muted)}
+    input, select, button{
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.03);
+      color:var(--text);
+      padding:10px 12px;
+      outline:none;
+    }
+    input[type="number"]{width:140px}
+    input[type="date"]{width:170px}
+    select{min-width:220px}
+    button{
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      cursor:pointer;
+    }
+    button:hover{filter:brightness(1.05)}
+    .btn-primary{background:linear-gradient(180deg, rgba(122,162,255,.35), rgba(122,162,255,.12)); border-color:rgba(122,162,255,.35)}
+    .btn-danger{background:linear-gradient(180deg, rgba(255,107,107,.30), rgba(255,107,107,.10)); border-color:rgba(255,107,107,.35)}
+    .pill{
+      font-size:12px; padding:6px 10px; border-radius:999px; border:1px solid var(--border);
+      background:rgba(255,255,255,.03);
+    }
+    .kpis{display:grid; grid-template-columns:repeat(2,1fr); gap:10px}
+    @media (max-width:520px){ .kpis{grid-template-columns:1fr} }
+    .kpi{
+      border-radius:16px; border:1px solid var(--border);
+      background:rgba(255,255,255,.02);
+      padding:12px;
+    }
+    .kpi .name{color:var(--muted); font-size:12px}
+    .kpi .val{font-size:20px; margin-top:6px}
+    .val small{color:var(--muted); font-size:12px}
+    .accent-va{border-color:rgba(122,162,255,.35)}
+    .accent-el{border-color:rgba(99,230,190,.35)}
+    .accent-ex{border-color:rgba(192,132,252,.35)}
+    .accent-sick{border-color:rgba(255,212,59,.40)}
+    .accent-sick2{border-color:rgba(255,146,43,.40)}
+    table{width:100%; border-collapse:separate; border-spacing:0 8px; margin-top:10px}
+    th{color:var(--muted); font-weight:600; text-align:left; font-size:12px; padding:0 10px}
+    td{
+      padding:10px; background:rgba(255,255,255,.02);
+      border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+    }
+    tr td:first-child{border-left:1px solid var(--border); border-top-left-radius:14px; border-bottom-left-radius:14px}
+    tr td:last-child{border-right:1px solid var(--border); border-top-right-radius:14px; border-bottom-right-radius:14px}
+    .tag{font-size:12px;padding:4px 8px;border-radius:999px;border:1px solid var(--border)}
+    .tag.va{border-color:rgba(122,162,255,.45)}
+    .tag.el{border-color:rgba(99,230,190,.45)}
+    .tag.ex{border-color:rgba(192,132,252,.45)}
+    .tag.sick{border-color:rgba(255,212,59,.55)}
+    .tag.sick2{border-color:rgba(255,146,43,.55)}
+    .right{text-align:right}
+    .muted{color:var(--muted)}
+    .small{font-size:12px}
+    .toast{
+      position:fixed; left:50%; transform:translateX(-50%);
+      bottom:16px; padding:10px 12px; border-radius:14px;
+      background:rgba(15,22,37,.96); border:1px solid var(--border);
+      color:var(--text); box-shadow:var(--shadow);
+      display:none;
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="title">
+      <h1>Congés — Appli installable</h1>
+      <div class="sub">Offline • Sauvegarde locale • Installable via Chrome</div>
+    </div>
+    <div class="row">
+      <span class="pill" id="installHint">📦 Astuce : menu Chrome → “Installer l’application”</span>
+      <button class="btn-danger" id="resetBtn" title="Réinitialiser toutes les données">Reset</button>
+    </div>
+  </header>
+
+  <div class="grid">
+    <section class="card">
+      <h2 style="margin:0 0 10px 0;font-size:16px">Ajouter une entrée</h2>
+
+      <div class="row" style="margin-bottom:10px">
+        <div>
+          <label>Date</label><br>
+          <input type="date" id="date">
+        </div>
+
+        <div>
+          <label>Type</label><br>
+          <select id="type">
+            <option value="VA">VA (vacances annuelles)</option>
+            <option value="EL">EL (extra-légaux)</option>
+            <option value="VA_PREV">VA restant année précédente</option>
+            <option value="EL_PREV">EL restant année précédente</option>
+            <option value="MALADIE">Maladie</option>
+            <option value="SANS_CERTIF">Jour sans certificat</option>
+            <option value="AUTRE">Autre</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Durée (heures)</label><br>
+          <input type="number" id="hours" step="0.01" min="0" placeholder="ex: 7.60">
+        </div>
+
+        <div style="flex:1; min-width:220px">
+          <label>Note</label><br>
+          <input type="text" id="note" placeholder="ex: rendez-vous, congé, etc." style="width:100%">
+        </div>
+
+        <div>
+          <label>&nbsp;</label><br>
+          <button class="btn-primary" id="addBtn">Ajouter</button>
+        </div>
+      </div>
+
+      <div class="row small muted">
+        <span>🔒 Tout est stocké sur ton appareil (pas de cloud).</span>
+        <span>🧠 Tu peux mettre des décimales (ex: 7.60).</span>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th class="right">Heures</th>
+            <th>Note</th>
+            <th class="right">Action</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </section>
+
+    <aside class="card">
+      <h2 style="margin:0 0 10px 0;font-size:16px">Totaux</h2>
+      <div class="kpis">
+        <div class="kpi accent-va">
+          <div class="name">VA utilisées</div>
+          <div class="val" id="kpiVA">0 <small>h</small></div>
+        </div>
+        <div class="kpi accent-el">
+          <div class="name">EL utilisées</div>
+          <div class="val" id="kpiEL">0 <small>h</small></div>
+        </div>
+        <div class="kpi accent-va">
+          <div class="name">VA année précédente</div>
+          <div class="val" id="kpiVAP">0 <small>h</small></div>
+        </div>
+        <div class="kpi accent-el">
+          <div class="name">EL année précédente</div>
+          <div class="val" id="kpiELP">0 <small>h</small></div>
+        </div>
+        <div class="kpi accent-sick">
+          <div class="name">Maladie</div>
+          <div class="val" id="kpiSick">0 <small>h</small></div>
+        </div>
+        <div class="kpi accent-sick2">
+          <div class="name">Sans certificat</div>
+          <div class="val" id="kpiSick2">0 <small>h</small></div>
+        </div>
+      </div>
+
+      <hr style="border:none;border-top:1px solid var(--border);margin:14px 0">
+
+      <div class="row" style="justify-content:space-between">
+        <div class="muted small">Export/Import (JSON)</div>
+        <div class="row">
+          <button id="exportBtn">Exporter</button>
+          <button id="importBtn">Importer</button>
+        </div>
+      </div>
+      <input type="file" id="file" accept="application/json" style="display:none">
+      <p class="muted small" style="margin:10px 0 0 0">
+        Astuce : l’export te sert de sauvegarde si tu changes de PC/téléphone.
+      </p>
+    </aside>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // --- PWA install (service worker) ---
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./sw.js").catch(()=>{});
+  }
+
+  const KEY = "conges_app_v1";
+
+  const $ = (id) => document.getElementById(id);
+
+  const state = {
+    items: load()
+  };
+
+  function load(){
+    try{
+      const raw = localStorage.getItem(KEY);
+      return raw ? JSON.parse(raw) : [];
+    }catch(e){
+      return [];
+    }
+  }
+
+  function save(){
+    localStorage.setItem(KEY, JSON.stringify(state.items));
+  }
+
+  function toast(msg){
+    const t = $("toast");
+    t.textContent = msg;
+    t.style.display = "block";
+    clearTimeout(toast._to);
+    toast._to = setTimeout(()=>{ t.style.display="none"; }, 2200);
+  }
+
+  function fmtHours(n){
+    const x = Number(n || 0);
+    return (Math.round(x*100)/100).toFixed(2);
+  }
+
+  function typeLabel(type){
+    const map = {
+      VA: "VA",
+      EL: "EL",
+      VA_PREV: "VA (année précédente)",
+      EL_PREV: "EL (année précédente)",
+      MALADIE: "Maladie",
+      SANS_CERTIF: "Sans certificat",
+      AUTRE: "Autre"
+    };
+    return map[type] || type;
+  }
+
+  function typeTagClass(type){
+    if(type === "VA" || type === "VA_PREV") return "va";
+    if(type === "EL" || type === "EL_PREV") return "el";
+    if(type === "MALADIE") return "sick";
+    if(type === "SANS_CERTIF") return "sick2";
+    if(type === "AUTRE") return "ex";
+    return "";
+  }
+
+  function totals(){
+    const sum = (t) => state.items
+      .filter(i => i.type === t)
+      .reduce((a,b)=> a + Number(b.hours||0), 0);
+
+    return {
+      VA: sum("VA"),
+      EL: sum("EL"),
+      VAP: sum("VA_PREV"),
+      ELP: sum("EL_PREV"),
+      SICK: sum("MALADIE"),
+      SICK2: sum("SANS_CERTIF")
+    };
+  }
+
+  function render(){
+    // table
+    const tbody = $("tbody");
+    tbody.innerHTML = "";
+
+    const items = [...state.items].sort((a,b)=> (b.date||"").localeCompare(a.date||""));
+    for(const it of items){
+      const tr = document.createElement("tr");
+
+      const tdDate = document.createElement("td");
+      tdDate.textContent = it.date || "";
+      tr.appendChild(tdDate);
+
+      const tdType = document.createElement("td");
+      tdType.innerHTML = `<span class="tag ${typeTagClass(it.type)}">${typeLabel(it.type)}</span>`;
+      tr.appendChild(tdType);
+
+      const tdH = document.createElement("td");
+      tdH.className = "right";
+      tdH.textContent = fmtHours(it.hours);
+      tr.appendChild(tdH);
+
+      const tdN = document.createElement("td");
+      tdN.textContent = it.note || "";
+      tr.appendChild(tdN);
+
+      const tdA = document.createElement("td");
+      tdA.className = "right";
+      const btn = document.createElement("button");
+      btn.textContent = "Suppr";
+      btn.className = "btn-danger";
+      btn.onclick = () => {
+        state.items = state.items.filter(x => x.id !== it.id);
+        save(); render();
+        toast("Entrée supprimée.");
+      };
+      tdA.appendChild(btn);
+      tr.appendChild(tdA);
+
+      tbody.appendChild(tr);
+    }
+
+    // KPIs
+    const t = totals();
+    $("kpiVA").innerHTML = `${fmtHours(t.VA)} <small>h</small>`;
+    $("kpiEL").innerHTML = `${fmtHours(t.EL)} <small>h</small>`;
+    $("kpiVAP").innerHTML = `${fmtHours(t.VAP)} <small>h</small>`;
+    $("kpiELP").innerHTML = `${fmtHours(t.ELP)} <small>h</small>`;
+    $("kpiSick").innerHTML = `${fmtHours(t.SICK)} <small>h</small>`;
+    $("kpiSick2").innerHTML = `${fmtHours(t.SICK2)} <small>h</small>`;
+  }
+
+  function add(){
+    const date = $("date").value;
+    const type = $("type").value;
+    const hours = $("hours").value;
+    const note = $("note").value.trim();
+
+    const h = Number(hours);
+    if(!date){
+      toast("Choisis une date.");
+      return;
+    }
+    if(!hours || Number.isNaN(h) || h <= 0){
+      toast("Mets une durée (heures) > 0.");
+      return;
+    }
+
+    state.items.push({
+      id: crypto?.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random(),
+      date, type,
+      hours: Math.round(h*100)/100,
+      note
+    });
+    save(); render();
+    $("hours").value = "";
+    $("note").value = "";
+    toast("Ajouté ✅");
+  }
+
+  $("addBtn").addEventListener("click", add);
+
+  $("resetBtn").addEventListener("click", () => {
+    const ok = confirm("Reset total ? Tu vas perdre toutes les entrées.");
+    if(!ok) return;
+    state.items = [];
+    save(); render();
+    toast("Réinitialisé.");
+  });
+
+  $("exportBtn").addEventListener("click", () => {
+    const blob = new Blob([JSON.stringify({version:1, items: state.items}, null, 2)], {type:"application/json"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "conges-export.json";
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
+  });
+
+  $("importBtn").addEventListener("click", () => $("file").click());
+
+  $("file").addEventListener("change", async (e) => {
+    const f = e.target.files?.[0];
+    if(!f) return;
+    try{
+      const txt = await f.text();
+      const data = JSON.parse(txt);
+      if(!data || !Array.isArray(data.items)) throw new Error("format");
+      state.items = data.items;
+      save(); render();
+      toast("Import OK ✅");
+    }catch(err){
+      toast("Import impossible (fichier invalide).");
+    }finally{
+      e.target.value = "";
+    }
+  });
+
+  // init date = aujourd'hui
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth()+1).padStart(2,"0");
+  const dd = String(today.getDate()).padStart(2,"0");
+  $("date").value = `${yyyy}-${mm}-${dd}`;
+
+  render();
+</script>
+</body>
+</html>
